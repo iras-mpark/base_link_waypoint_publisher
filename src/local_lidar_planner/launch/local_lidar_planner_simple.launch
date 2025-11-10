@@ -1,0 +1,33 @@
+<launch>
+  <arg name="path_frame" default="vehicle"/>
+  <arg name="cmd_frame" default="vehicle"/>
+  <arg name="max_speed" default="0.8"/>
+  <arg name="speed_gain" default="0.8"/>
+  <arg name="lookahead_distance" default="0.4"/>
+  <arg name="goal_tolerance" default="0.3"/>
+  <arg name="safety_radius" default="0.45"/>
+  <arg name="max_path_length" default="3.0"/>
+  <arg name="publish_rate_hz" default="10.0"/>
+  <arg name="is_real_robot" default="false"/>
+  <arg name="scan_topic" default="/utlidar/cloud"/>
+  <arg name="goal_tf_frame" default="suitcase_frame"/>
+
+  <node pkg="local_lidar_planner" exec="local_lidar_planner_simple.py" name="local_lidar_planner_simple" output="screen">
+    <param name="path_frame" value="$(var path_frame)"/>
+    <param name="max_path_length" value="$(var max_path_length)"/>
+    <param name="publish_rate_hz" value="$(var publish_rate_hz)"/>
+    <param name="safety_radius" value="$(var safety_radius)"/>
+    <param name="scan_topic" value="$(var scan_topic)"/>
+    <param name="goal_tf_frame" value="$(var goal_tf_frame)"/>
+  </node>
+
+  <node pkg="local_lidar_planner" exec="path_follower_simple.py" name="path_follower_simple" output="screen">
+    <param name="path_frame" value="$(var path_frame)"/>
+    <param name="cmd_frame" value="$(var cmd_frame)"/>
+    <param name="max_speed" value="$(var max_speed)"/>
+    <param name="speed_gain" value="$(var speed_gain)"/>
+    <param name="lookahead_distance" value="$(var lookahead_distance)"/>
+    <param name="goal_tolerance" value="$(var goal_tolerance)"/>
+    <param name="is_real_robot" value="$(var is_real_robot)"/>
+  </node>
+</launch>

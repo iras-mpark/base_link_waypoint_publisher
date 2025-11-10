@@ -10,6 +10,9 @@
   <arg name="joyToSpeedDelay" default="1.0"/>
   <arg name="goalCloseDis" default="0.4"/>
   <arg name="adjacentRange" default="3.0"/>
+  <arg name="is_real_robot" default="false"/>
+  <arg name="laserTopic" default="/utlidar/cloud"/>
+  <arg name="laserFixedFrame" default="base_link"/>
 
   <node pkg="local_lidar_planner" exec="local_lidar_planner_node" name="local_lidar_planner" output="screen">
     <param name="pathFolder" value="$(find-pkg-share local_lidar_planner)/paths" />
@@ -26,6 +29,20 @@
     <param name="goalCloseDis" value="$(var goalCloseDis)" />
     <param name="adjacentRange" value="$(var adjacentRange)" />
     <param name="useTerrainAnalysis" value="false" />
+    <param name="laserTopic" value="$(var laserTopic)" />
+    <param name="laserFixedFrame" value="$(var laserFixedFrame)" />
+  </node>
+
+  <node pkg="local_lidar_planner" exec="path_follower_node" name="path_follower" output="screen">
+    <param name="sensorOffsetX" value="$(var sensorOffsetX)" />
+    <param name="sensorOffsetY" value="$(var sensorOffsetY)" />
+    <param name="twoWayDrive" value="$(var twoWayDrive)" />
+    <param name="maxSpeed" value="$(var maxSpeed)" />
+    <param name="autonomyMode" value="$(var autonomyMode)" />
+    <param name="autonomySpeed" value="$(var autonomySpeed)" />
+    <param name="joyToSpeedDelay" value="$(var joyToSpeedDelay)" />
+    <param name="goalCloseDis" value="$(var goalCloseDis)" />
+    <param name="is_real_robot" value="$(var is_real_robot)" />
   </node>
 
 </launch>

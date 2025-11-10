@@ -24,6 +24,8 @@ find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(pcl_ros REQUIRED)
 find_package(pcl_conversions REQUIRED)
+find_package(unitree_api REQUIRED)
+find_package(go2_sport_api REQUIRED)
 
 include_directories(
   include
@@ -44,8 +46,28 @@ ament_target_dependencies(local_lidar_planner_node
   pcl_conversions
 )
 
+add_executable(path_follower_node src/path_follower_node.cpp)
+ament_target_dependencies(path_follower_node
+  rclcpp
+  std_msgs
+  sensor_msgs
+  nav_msgs
+  geometry_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  unitree_api
+  go2_sport_api
+)
+
 install(TARGETS
   local_lidar_planner_node
+  path_follower_node
+  DESTINATION lib/${PROJECT_NAME})
+
+install(PROGRAMS
+  scripts/local_lidar_planner_simple.py
+  scripts/path_follower_simple.py
   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

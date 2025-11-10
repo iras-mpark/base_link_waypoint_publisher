@@ -44,6 +44,8 @@ const double PI = 3.1415926;
 #define PLOTPATHSET 1
 
 string pathFolder;
+string laserTopic = "/utlidar/cloud";
+string laserFixedFrame = "base_link";
 double vehicleLength = 0.6;
 double vehicleWidth = 0.6;
 double sensorOffsetX = 0;
@@ -142,7 +144,9 @@ void laserCloudHandler(const sensor_msgs::msg::PointCloud2::ConstSharedPtr laser
   odomTime = nh->now().seconds();
   if (!useTerrainAnalysis) {
     laserCloud->clear();
-    pcl::fromROSMsg(*laserCloud2, *laserCloud);
+    sensor_msgs::msg::PointCloud2 cloud = *laserCloud2;
+    cloud.header.frame_id = laserFixedFrame;
+    pcl::fromROSMsg(cloud, *laserCloud);
 
     pcl::PointXYZI point;
     laserCloudCrop->clear();
@@ -495,6 +499,8 @@ int main(int argc, char** argv)
   nh->declare_parameter<double>("vehicleWidth", vehicleWidth);
   nh->declare_parameter<double>("sensorOffsetX", sensorOffsetX);
   nh->declare_parameter<double>("sensorOffsetY", sensorOffsetY);
+  nh->declare_parameter<string>("laserTopic", laserTopic);
+  nh->declare_parameter<string>("laserFixedFrame", laserFixedFrame);
   nh->declare_parameter<bool>("twoWayDrive", twoWayDrive);
   nh->declare_parameter<double>("laserVoxelSize", laserVoxelSize);
   nh->declare_parameter<double>("terrainVoxelSize", terrainVoxelSize);
@@ -535,6 +541,8 @@ int main(int argc, char** argv)
   nh->get_parameter("vehicleWidth", vehicleWidth);
   nh->get_parameter("sensorOffsetX", sensorOffsetX);
   nh->get_parameter("sensorOffsetY", sensorOffsetY);
+  nh->get_parameter("laserTopic", laserTopic);
+  nh->get_parameter("laserFixedFrame", laserFixedFrame);
   nh->get_parameter("twoWayDrive", twoWayDrive);
   nh->get_parameter("laserVoxelSize", laserVoxelSize);
   nh->get_parameter("terrainVoxelSize", terrainVoxelSize);
@@ -571,7 +579,7 @@ int main(int argc, char** argv)
   nh->get_parameter("goalX", goalX);
   nh->get_parameter("goalY", goalY);
 
-  auto subLaserCloud = nh->create_subscription<sensor_msgs::msg::PointCloud2>("/registered_scan", 5, laserCloudHandler);
+  auto subLaserCloud = nh->create_subscription<sensor_msgs::msg::PointCloud2>(laserTopic, 5, laserCloudHandler);
 
   auto subTerrainCloud = nh->create_subscription<sensor_msgs::msg::PointCloud2>("/terrain_map", 5, terrainCloudHandler);
 
