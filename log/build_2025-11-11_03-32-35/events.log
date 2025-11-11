@@ -1,0 +1,121 @@
+[0.000000] (-) TimerEvent: {}
+[0.000422] (local_lidar_planner) JobQueued: {'identifier': 'local_lidar_planner', 'dependencies': OrderedDict()}
+[0.000467] (local_lidar_planner) JobStarted: {'identifier': 'local_lidar_planner'}
+[0.004289] (local_lidar_planner) JobProgress: {'identifier': 'local_lidar_planner', 'progress': 'cmake'}
+[0.004587] (local_lidar_planner) Command: {'cmd': ['/usr/bin/cmake', '/root/local_lidar_planner/src/local_lidar_planner', '-DCATKIN_INSTALL_INTO_PREFIX_ROOT=0', '-DCMAKE_INSTALL_PREFIX=/root/local_lidar_planner/install/local_lidar_planner'], 'cwd': '/root/local_lidar_planner/build/local_lidar_planner', 'env': OrderedDict([('LESSOPEN', '| /usr/bin/lesspipe %s'), ('HOSTNAME', 'mk'), ('SHLVL', '1'), ('LD_LIBRARY_PATH', '/root/unitree_ros2/cyclonedds_ws/install/unitree_hg/lib:/root/unitree_ros2/cyclonedds_ws/install/unitree_go/lib:/root/unitree_ros2/cyclonedds_ws/install/unitree_api/lib:/root/unitree_ros2/cyclonedds_ws/install/rmw_cyclonedds_cpp/lib:/root/unitree_ros2/cyclonedds_ws/install/cyclonedds/lib:/usr/lib/x86_64-linux-gnu/gazebo-11/plugins:/opt/ros/humble/opt/rviz_ogre_vendor/lib:/opt/ros/humble/lib/x86_64-linux-gnu:/opt/ros/humble/lib'), ('HOME', '/root'), ('CYCLONEDDS_URI', '<CycloneDDS><Domain><General><Interfaces>\n                            <NetworkInterface name="wlx503dd1da5580" priority="default" multicast="default" />\n                        </Interfaces></General></Domain></CycloneDDS>'), ('OLDPWD', '/root'), ('NVM_BIN', '/root/.nvm/versions/node/v24.11.0/bin'), ('NVM_INC', '/root/.nvm/versions/node/v24.11.0/include/node'), ('ROS_PYTHON_VERSION', '3'), ('LC_CTYPE', 'C.UTF-8'), ('NVM_DIR', '/root/.nvm'), ('COLCON_PREFIX_PATH', '/root/unitree_ros2/cyclonedds_ws/install'), ('ROS_DISTRO', 'humble'), ('_', '/usr/bin/colcon'), ('ROS_VERSION', '2'), ('PKG_CONFIG_PATH', '/root/unitree_ros2/cyclonedds_ws/install/cyclonedds/lib/x86_64-linux-gnu/pkgconfig:/root/unitree_ros2/cyclonedds_ws/install/cyclonedds/lib/pkgconfig'), ('TERM', 'xterm'), ('ROS_LOCALHOST_ONLY', '0'), ('QT_X11_NO_MITSHM', '1'), ('PATH', '/root/.nvm/versions/node/v24.11.0/bin:/root/unitree_ros2/cyclonedds_ws/install/cyclonedds/bin:/opt/ros/humble/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'), ('DISPLAY', ':1'), ('RMW_IMPLEMENTATION', 'rmw_cyclonedds_cpp'), ('LS_COLORS', 'rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'), ('AMENT_PREFIX_PATH', '/root/unitree_ros2/cyclonedds_ws/install/unitree_hg:/root/unitree_ros2/cyclonedds_ws/install/unitree_go:/root/unitree_ros2/cyclonedds_ws/install/unitree_api:/root/unitree_ros2/cyclonedds_ws/install/rmw_cyclonedds_cpp:/opt/ros/humble'), ('LESSCLOSE', '/usr/bin/lesspipe %s %s'), ('PWD', '/root/local_lidar_planner/build/local_lidar_planner'), ('NVM_CD_FLAGS', ''), ('PYTHONPATH', '/root/unitree_ros2/cyclonedds_ws/install/unitree_hg/local/lib/python3.10/dist-packages:/root/unitree_ros2/cyclonedds_ws/install/unitree_go/local/lib/python3.10/dist-packages:/root/unitree_ros2/cyclonedds_ws/install/unitree_api/local/lib/python3.10/dist-packages:/opt/ros/humble/lib/python3.10/site-packages:/opt/ros/humble/local/lib/python3.10/dist-packages'), ('COLCON', '1'), ('CMAKE_PREFIX_PATH', '/root/unitree_ros2/cyclonedds_ws/install/unitree_hg:/root/unitree_ros2/cyclonedds_ws/install/unitree_go:/root/unitree_ros2/cyclonedds_ws/install/unitree_api:/root/unitree_ros2/cyclonedds_ws/install/rmw_cyclonedds_cpp:/root/unitree_ros2/cyclonedds_ws/install/cyclonedds')]), 'shell': False}
+[0.030048] (local_lidar_planner) StdoutLine: {'line': b'-- The C compiler identification is GNU 11.4.0\n'}
+[0.052452] (local_lidar_planner) StdoutLine: {'line': b'-- The CXX compiler identification is GNU 11.4.0\n'}
+[0.056475] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting C compiler ABI info\n'}
+[0.083781] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting C compiler ABI info - done\n'}
+[0.086814] (local_lidar_planner) StdoutLine: {'line': b'-- Check for working C compiler: /usr/bin/cc - skipped\n'}
+[0.086891] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting C compile features\n'}
+[0.087053] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting C compile features - done\n'}
+[0.088334] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info\n'}
+[0.099781] (-) TimerEvent: {}
+[0.122225] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting CXX compiler ABI info - done\n'}
+[0.125334] (local_lidar_planner) StdoutLine: {'line': b'-- Check for working CXX compiler: /usr/bin/c++ - skipped\n'}
+[0.125503] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting CXX compile features\n'}
+[0.125783] (local_lidar_planner) StdoutLine: {'line': b'-- Detecting CXX compile features - done\n'}
+[0.127641] (local_lidar_planner) StdoutLine: {'line': b'-- Found ament_cmake: 1.3.12 (/opt/ros/humble/share/ament_cmake/cmake)\n'}
+[0.197874] (local_lidar_planner) StdoutLine: {'line': b'-- Found Python3: /usr/bin/python3 (found version "3.10.12") found components: Interpreter \n'}
+[0.199852] (-) TimerEvent: {}
+[0.248884] (local_lidar_planner) StdoutLine: {'line': b'-- Found rclcpp: 16.0.15 (/opt/ros/humble/share/rclcpp/cmake)\n'}
+[0.271789] (local_lidar_planner) StdoutLine: {'line': b'-- Found rosidl_generator_c: 3.1.7 (/opt/ros/humble/share/rosidl_generator_c/cmake)\n'}
+[0.274458] (local_lidar_planner) StdoutLine: {'line': b'-- Found rosidl_adapter: 3.1.7 (/opt/ros/humble/share/rosidl_adapter/cmake)\n'}
+[0.278467] (local_lidar_planner) StdoutLine: {'line': b'-- Found rosidl_generator_cpp: 3.1.7 (/opt/ros/humble/share/rosidl_generator_cpp/cmake)\n'}
+[0.283952] (local_lidar_planner) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c\n'}
+[0.291551] (local_lidar_planner) StdoutLine: {'line': b'-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp\n'}
+[0.299928] (-) TimerEvent: {}
+[0.312716] (local_lidar_planner) StdoutLine: {'line': b'-- Found rmw_implementation_cmake: 6.1.2 (/opt/ros/humble/share/rmw_implementation_cmake/cmake)\n'}
+[0.313460] (local_lidar_planner) StdoutLine: {'line': b'-- Found rmw_cyclonedds_cpp: 1.3.4 (/root/unitree_ros2/cyclonedds_ws/install/rmw_cyclonedds_cpp/share/rmw_cyclonedds_cpp/cmake)\n'}
+[0.323561] (local_lidar_planner) StdoutLine: {'line': b"-- Using RMW implementation 'rmw_cyclonedds_cpp' as default\n"}
+[0.328290] (local_lidar_planner) StdoutLine: {'line': b'-- Looking for pthread.h\n'}
+[0.361290] (local_lidar_planner) StdoutLine: {'line': b'-- Looking for pthread.h - found\n'}
+[0.361516] (local_lidar_planner) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD\n'}
+[0.391883] (local_lidar_planner) StdoutLine: {'line': b'-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success\n'}
+[0.392371] (local_lidar_planner) StdoutLine: {'line': b'-- Found Threads: TRUE  \n'}
+[0.399984] (-) TimerEvent: {}
+[0.415185] (local_lidar_planner) StdoutLine: {'line': b'-- Found sensor_msgs: 4.9.0 (/opt/ros/humble/share/sensor_msgs/cmake)\n'}
+[0.428175] (local_lidar_planner) StdoutLine: {'line': b'-- Found nav_msgs: 4.9.0 (/opt/ros/humble/share/nav_msgs/cmake)\n'}
+[0.435593] (local_lidar_planner) StdoutLine: {'line': b'-- Found tf2: 0.25.16 (/opt/ros/humble/share/tf2/cmake)\n'}
+[0.441549] (local_lidar_planner) StdoutLine: {'line': b'-- Found tf2_ros: 0.25.16 (/opt/ros/humble/share/tf2_ros/cmake)\n'}
+[0.482939] (local_lidar_planner) StdoutLine: {'line': b'-- Found tf2_geometry_msgs: 0.25.16 (/opt/ros/humble/share/tf2_geometry_msgs/cmake)\n'}
+[0.493438] (local_lidar_planner) StdoutLine: {'line': b'-- Found eigen3_cmake_module: 0.1.1 (/opt/ros/humble/share/eigen3_cmake_module/cmake)\n'}
+[0.494332] (local_lidar_planner) StdoutLine: {'line': b'-- Found Eigen3: TRUE (found version "3.4.0") \n'}
+[0.494435] (local_lidar_planner) StdoutLine: {'line': b'-- Ensuring Eigen3 include directory is part of orocos-kdl CMake target\n'}
+[0.496330] (local_lidar_planner) StdoutLine: {'line': b'-- Found pcl_ros: 2.4.5 (/opt/ros/humble/share/pcl_ros/cmake)\n'}
+[0.500065] (-) TimerEvent: {}
+[0.517496] (local_lidar_planner) StdoutLine: {'line': b"-- Checking for module 'eigen3'\n"}
+[0.524236] (local_lidar_planner) StdoutLine: {'line': b'--   Found eigen3, version 3.4.0\n'}
+[0.538159] (local_lidar_planner) StdoutLine: {'line': b'-- Found Eigen: /usr/include/eigen3 (Required is at least version "3.1") \n'}
+[0.538198] (local_lidar_planner) StdoutLine: {'line': b'-- Eigen found (include: /usr/include/eigen3, version: 3.4.0)\n'}
+[0.553744] (local_lidar_planner) StdoutLine: {'line': b"-- Checking for module 'flann'\n"}
+[0.560038] (local_lidar_planner) StdoutLine: {'line': b'--   Found flann, version 1.9.1\n'}
+[0.578452] (local_lidar_planner) StdoutLine: {'line': b'-- Found FLANN: /usr/lib/x86_64-linux-gnu/libflann_cpp.so  \n'}
+[0.578532] (local_lidar_planner) StdoutLine: {'line': b'-- FLANN found (include: /usr/include, lib: /usr/lib/x86_64-linux-gnu/libflann_cpp.so)\n'}
+[0.600125] (-) TimerEvent: {}
+[0.700253] (-) TimerEvent: {}
+[0.800397] (-) TimerEvent: {}
+[0.900560] (-) TimerEvent: {}
+[0.952234] (local_lidar_planner) StdoutLine: {'line': b"-- Checking for module 'libusb-1.0'\n"}
+[0.956706] (local_lidar_planner) StdoutLine: {'line': b'--   Found libusb-1.0, version 1.0.25\n'}
+[0.971066] (local_lidar_planner) StdoutLine: {'line': b'-- Found libusb: /usr/lib/x86_64-linux-gnu/libusb-1.0.so  \n'}
+[0.971479] (local_lidar_planner) StdoutLine: {'line': b'-- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)\n'}
+[0.990577] (local_lidar_planner) StdoutLine: {'line': b'-- OpenNI2 found (version: 2.2.0.33, include: /usr/include/openni2, lib: /usr/lib/x86_64-linux-gnu/libOpenNI2.so;libusb::libusb)\n'}
+[1.000616] (-) TimerEvent: {}
+[1.056448] (local_lidar_planner) StdoutLine: {'line': b'-- Eigen found (include: /usr/include/eigen3, version: 3.4.0)\n'}
+[1.060023] (local_lidar_planner) StdoutLine: {'line': b'-- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)\n'}
+[1.062874] (local_lidar_planner) StdoutLine: {'line': b'-- OpenNI2 found (version: 2.2.0.33, include: /usr/include/openni2, lib: /usr/lib/x86_64-linux-gnu/libOpenNI2.so;libusb::libusb)\n'}
+[1.100675] (-) TimerEvent: {}
+[1.128250] (local_lidar_planner) StdoutLine: {'line': b'-- Found Qhull version 8.0.2\n'}
+[1.191568] (local_lidar_planner) StdoutLine: {'line': b'-- OpenNI found (version: 1.5.4.0, include: /usr/include/ni, lib: /usr/lib/libOpenNI.so;libusb::libusb)\n'}
+[1.200757] (-) TimerEvent: {}
+[1.257014] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_COMMON: /usr/lib/x86_64-linux-gnu/libpcl_common.so  \n'}
+[1.257329] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_KDTREE: /usr/lib/x86_64-linux-gnu/libpcl_kdtree.so  \n'}
+[1.257595] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_OCTREE: /usr/lib/x86_64-linux-gnu/libpcl_octree.so  \n'}
+[1.257868] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_SEARCH: /usr/lib/x86_64-linux-gnu/libpcl_search.so  \n'}
+[1.258136] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_SAMPLE_CONSENSUS: /usr/lib/x86_64-linux-gnu/libpcl_sample_consensus.so  \n'}
+[1.258410] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_FILTERS: /usr/lib/x86_64-linux-gnu/libpcl_filters.so  \n'}
+[1.258543] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_2D: /usr/include/pcl-1.12  \n'}
+[1.258662] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_GEOMETRY: /usr/include/pcl-1.12  \n'}
+[1.258935] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_IO: /usr/lib/x86_64-linux-gnu/libpcl_io.so  \n'}
+[1.259242] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_FEATURES: /usr/lib/x86_64-linux-gnu/libpcl_features.so  \n'}
+[1.259571] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_ML: /usr/lib/x86_64-linux-gnu/libpcl_ml.so  \n'}
+[1.259846] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_SEGMENTATION: /usr/lib/x86_64-linux-gnu/libpcl_segmentation.so  \n'}
+[1.260171] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_VISUALIZATION: /usr/lib/x86_64-linux-gnu/libpcl_visualization.so  \n'}
+[1.260485] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_SURFACE: /usr/lib/x86_64-linux-gnu/libpcl_surface.so  \n'}
+[1.260778] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_REGISTRATION: /usr/lib/x86_64-linux-gnu/libpcl_registration.so  \n'}
+[1.261105] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_KEYPOINTS: /usr/lib/x86_64-linux-gnu/libpcl_keypoints.so  \n'}
+[1.261396] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_TRACKING: /usr/lib/x86_64-linux-gnu/libpcl_tracking.so  \n'}
+[1.261703] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_RECOGNITION: /usr/lib/x86_64-linux-gnu/libpcl_recognition.so  \n'}
+[1.262050] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_STEREO: /usr/lib/x86_64-linux-gnu/libpcl_stereo.so  \n'}
+[1.262329] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_APPS: /usr/lib/x86_64-linux-gnu/libpcl_apps.so  \n'}
+[1.262610] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_IN_HAND_SCANNER: /usr/include/pcl-1.12  \n'}
+[1.262720] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_MODELER: /usr/include/pcl-1.12  \n'}
+[1.262842] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_POINT_CLOUD_EDITOR: /usr/include/pcl-1.12  \n'}
+[1.263140] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_OUTOFCORE: /usr/lib/x86_64-linux-gnu/libpcl_outofcore.so  \n'}
+[1.263431] (local_lidar_planner) StdoutLine: {'line': b'-- Found PCL_PEOPLE: /usr/lib/x86_64-linux-gnu/libpcl_people.so  \n'}
+[1.267713] (local_lidar_planner) StdoutLine: {'line': b'-- Found unitree_api: 0.0.0 (/root/unitree_ros2/cyclonedds_ws/install/unitree_api/share/unitree_api/cmake)\n'}
+[1.278921] (local_lidar_planner) StderrLine: {'line': b'\x1b[31mCMake Error at CMakeLists.txt:28 (find_package):\n'}
+[1.278987] (local_lidar_planner) StderrLine: {'line': b'  By not providing "Findgo2_sport_api.cmake" in CMAKE_MODULE_PATH this\n'}
+[1.279027] (local_lidar_planner) StderrLine: {'line': b'  project has asked CMake to find a package configuration file provided by\n'}
+[1.279064] (local_lidar_planner) StderrLine: {'line': b'  "go2_sport_api", but CMake did not find one.\n'}
+[1.279099] (local_lidar_planner) StderrLine: {'line': b'\n'}
+[1.279133] (local_lidar_planner) StderrLine: {'line': b'  Could not find a package configuration file provided by "go2_sport_api"\n'}
+[1.279165] (local_lidar_planner) StderrLine: {'line': b'  with any of the following names:\n'}
+[1.279196] (local_lidar_planner) StderrLine: {'line': b'\n'}
+[1.279227] (local_lidar_planner) StderrLine: {'line': b'    go2_sport_apiConfig.cmake\n'}
+[1.279257] (local_lidar_planner) StderrLine: {'line': b'    go2_sport_api-config.cmake\n'}
+[1.279288] (local_lidar_planner) StderrLine: {'line': b'\n'}
+[1.279318] (local_lidar_planner) StderrLine: {'line': b'  Add the installation prefix of "go2_sport_api" to CMAKE_PREFIX_PATH or set\n'}
+[1.279349] (local_lidar_planner) StderrLine: {'line': b'  "go2_sport_api_DIR" to a directory containing one of the above files.  If\n'}
+[1.279380] (local_lidar_planner) StderrLine: {'line': b'  "go2_sport_api" provides a separate development package or SDK, be sure it\n'}
+[1.279410] (local_lidar_planner) StderrLine: {'line': b'  has been installed.\n'}
+[1.279441] (local_lidar_planner) StderrLine: {'line': b'\n'}
+[1.279472] (local_lidar_planner) StderrLine: {'line': b'\x1b[0m\n'}
+[1.279503] (local_lidar_planner) StdoutLine: {'line': b'-- Configuring incomplete, errors occurred!\n'}
+[1.279536] (local_lidar_planner) StdoutLine: {'line': b'See also "/root/local_lidar_planner/build/local_lidar_planner/CMakeFiles/CMakeOutput.log".\n'}
+[1.288260] (local_lidar_planner) CommandEnded: {'returncode': 1}
+[1.299013] (local_lidar_planner) JobEnded: {'identifier': 'local_lidar_planner', 'rc': 1}
+[1.300814] (-) TimerEvent: {}
+[1.309198] (-) EventReactorShutdown: {}

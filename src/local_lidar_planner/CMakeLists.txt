@@ -22,10 +22,10 @@ find_package(geometry_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
-find_package(pcl_ros REQUIRED)
+find_package(PCL REQUIRED)
 find_package(pcl_conversions REQUIRED)
-find_package(unitree_api REQUIRED)
-find_package(go2_sport_api REQUIRED)
+find_package(unitree_api QUIET)
+find_package(go2_sport_api QUIET)
 
 include_directories(
   include
@@ -42,28 +42,36 @@ ament_target_dependencies(local_lidar_planner_node
   tf2
   tf2_ros
   tf2_geometry_msgs
-  pcl_ros
   pcl_conversions
+  PCL
 )
+target_link_libraries(local_lidar_planner_node ${PCL_LIBRARIES})
 
-add_executable(path_follower_node src/path_follower_node.cpp)
-ament_target_dependencies(path_follower_node
-  rclcpp
-  std_msgs
-  sensor_msgs
-  nav_msgs
-  geometry_msgs
-  tf2
-  tf2_ros
-  tf2_geometry_msgs
-  unitree_api
-  go2_sport_api
-)
+if(unitree_api_FOUND AND go2_sport_api_FOUND)
+  add_executable(path_follower_node src/path_follower_node.cpp)
+  ament_target_dependencies(path_follower_node
+    rclcpp
+    std_msgs
+    sensor_msgs
+    nav_msgs
+    geometry_msgs
+    tf2
+    tf2_ros
+    tf2_geometry_msgs
+    unitree_api
+    go2_sport_api
+  )
+else()
+  message(WARNING "unitree_api/go2_sport_api not found. Skipping path_follower_node build.")
+endif()
 
 install(TARGETS
   local_lidar_planner_node
-  path_follower_node
   DESTINATION lib/${PROJECT_NAME})
+
+if(TARGET path_follower_node)
+  install(TARGETS path_follower_node DESTINATION lib/${PROJECT_NAME})
+endif()
 
 install(PROGRAMS
   scripts/local_lidar_planner_simple.py

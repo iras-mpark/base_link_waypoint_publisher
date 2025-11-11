@@ -1,0 +1,17 @@
+[31mCMake Error at CMakeLists.txt:28 (find_package):
+  By not providing "Findgo2_sport_api.cmake" in CMAKE_MODULE_PATH this
+  project has asked CMake to find a package configuration file provided by
+  "go2_sport_api", but CMake did not find one.
+
+  Could not find a package configuration file provided by "go2_sport_api"
+  with any of the following names:
+
+    go2_sport_apiConfig.cmake
+    go2_sport_api-config.cmake
+
+  Add the installation prefix of "go2_sport_api" to CMAKE_PREFIX_PATH or set
+  "go2_sport_api_DIR" to a directory containing one of the above files.  If
+  "go2_sport_api" provides a separate development package or SDK, be sure it
+  has been installed.
+
+[0m

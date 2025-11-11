@@ -30,6 +30,6 @@ Launch both with:
 ros2 launch local_lidar_planner local_lidar_planner_simple.launch
 ```
 
-All original C++ nodes remain untouched for full-feature deployments.
+All original C++ nodes remain untouched. If `unitree_api` / `go2_sport_api` are not installed, the C++ `path_follower_node` target is automatically skipped during the build—use the Python follower instead in that case.
 
 > **LiDAR input:** Both the C++ and Python planners now default to reading `/utlidar/cloud` directly and assume the scan is expressed in `base_link`. Override the topic or target frame via the `laserTopic` / `laserFixedFrame` and `scan_topic` parameters if your setup differs.
