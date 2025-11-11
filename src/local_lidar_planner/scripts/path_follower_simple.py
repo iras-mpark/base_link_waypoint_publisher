@@ -69,6 +69,8 @@ class SimplePathFollower(Node):
 
         if not self.current_path or len(self.current_path.poses) == 0:
             self.cmd_pub.publish(cmd)
+            if self.is_real_robot:
+                self._publish_sport_request(cmd)
             return
 
         last_pose = self.current_path.poses[-1].pose.position
