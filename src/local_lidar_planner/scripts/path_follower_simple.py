@@ -24,12 +24,12 @@ class SimplePathFollower(Node):
         self.declare_parameter("path_frame", "vehicle")
         self.declare_parameter("cmd_frame", "vehicle")
         self.declare_parameter("publish_rate_hz", 50.0)
-        self.declare_parameter("max_speed", 0.8)
-        self.declare_parameter("speed_gain", 0.8)
+        self.declare_parameter("max_speed", 0.6)
+        self.declare_parameter("speed_gain", 0.55)
         self.declare_parameter("lookahead_distance", 0.4)
         self.declare_parameter("goal_tolerance", 0.2)
-        self.declare_parameter("angular_gain", 2.0)
-        self.declare_parameter("max_yaw_rate", 1.2)  # rad/s
+        self.declare_parameter("angular_gain", 1.5)
+        self.declare_parameter("max_yaw_rate", 1.0)  # rad/s
         self.declare_parameter("is_real_robot", False)
 
         self.path_frame = self.get_parameter("path_frame").get_parameter_value().string_value
