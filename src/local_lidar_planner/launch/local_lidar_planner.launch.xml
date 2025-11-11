@@ -15,6 +15,7 @@
   <arg name="is_real_robot" default="true"/>
   <arg name="scan_topic" default="/utlidar/cloud"/>
   <arg name="goal_tf_frame" default="suitcase_frame"/>
+  <arg name="lidar_frame" default="utlidar_lidar"/>
   <arg name="lidar_x" default="0.0"/>
   <arg name="lidar_y" default="0.0"/>
   <arg name="lidar_z" default="0.0"/>
@@ -45,6 +46,14 @@
     <param name="is_real_robot" value="$(var is_real_robot)"/>
   </node>
 
-  <node pkg="tf2_ros" exec="static_transform_publisher" name="utlidar_to_path_frame"
-        args="$(var lidar_x) $(var lidar_y) $(var lidar_z) $(var lidar_roll) $(var lidar_pitch) $(var lidar_yaw) utlidar_lidar $(var path_frame)"/>
+  <node pkg="local_lidar_planner" exec="utlidar_tf_broadcaster.py" name="utlidar_tf_broadcaster" output="screen">
+    <param name="lidar_frame" value="$(var lidar_frame)"/>
+    <param name="path_frame" value="$(var path_frame)"/>
+    <param name="lidar_x" value="$(var lidar_x)"/>
+    <param name="lidar_y" value="$(var lidar_y)"/>
+    <param name="lidar_z" value="$(var lidar_z)"/>
+    <param name="lidar_roll" value="$(var lidar_roll)"/>
+    <param name="lidar_pitch" value="$(var lidar_pitch)"/>
+    <param name="lidar_yaw" value="$(var lidar_yaw)"/>
+  </node>
 </launch>
