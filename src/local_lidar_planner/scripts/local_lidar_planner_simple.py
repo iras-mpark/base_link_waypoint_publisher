@@ -27,6 +27,7 @@ from nav_msgs.msg import Path
 from sensor_msgs.msg import PointCloud2
 from sensor_msgs_py import point_cloud2
 from tf2_ros import Buffer, TransformException, TransformListener
+from tf_transformations import euler_matrix
 
 
 class SimpleLocalPlanner(Node):
@@ -57,6 +58,12 @@ class SimpleLocalPlanner(Node):
         self.declare_parameter("goal_filter_process_std", 0.05)
         self.declare_parameter("goal_filter_measurement_std", 0.15)
         self.declare_parameter("obstacle_topic", "/local_obstacles")
+        self.declare_parameter("lidar_x", 0.0)
+        self.declare_parameter("lidar_y", 0.0)
+        self.declare_parameter("lidar_z", 0.0)
+        self.declare_parameter("lidar_roll", 0.0)
+        self.declare_parameter("lidar_pitch", 0.0)
+        self.declare_parameter("lidar_yaw", 0.0)
 
         self.path_frame: str = self.get_parameter("path_frame").get_parameter_value().string_value
         publish_rate_hz = self.get_parameter("publish_rate_hz").get_parameter_value().double_value
@@ -90,6 +97,15 @@ class SimpleLocalPlanner(Node):
         self.goal_last_measurement: Optional[Time] = None
         self.goal_last_filter_update = self.get_clock().now()
         self._goal_stale_warned = False
+        self.lidar_translation = (
+            self.get_parameter("lidar_x").get_parameter_value().double_value,
+            self.get_parameter("lidar_y").get_parameter_value().double_value,
+            self.get_parameter("lidar_z").get_parameter_value().double_value,
+        )
+        roll = self.get_parameter("lidar_roll").get_parameter_value().double_value
+        pitch = self.get_parameter("lidar_pitch").get_parameter_value().double_value
+        yaw = self.get_parameter("lidar_yaw").get_parameter_value().double_value
+        self.lidar_rotation = euler_matrix(roll, pitch, yaw)[:3, :3]
 
         self.bin_ranges: List[float] = [math.inf for _ in range(self.num_heading_bins)]
         self.last_scan_time = self.get_clock().now()
@@ -117,7 +133,7 @@ class SimpleLocalPlanner(Node):
         obstacle_points: List[Tuple[float, float, float]] = []
 
         for point in point_cloud2.read_points(cloud, field_names=("x", "y", "z"), skip_nans=True):
-            x, y, z = point
+            x, y, z = self._transform_point(point)
             if not (self.obstacle_z_min <= z <= self.obstacle_z_max):
                 continue
 
@@ -142,6 +158,15 @@ class SimpleLocalPlanner(Node):
             obstacle_msg.header = obstacle_header
         obstacle_msg.header.stamp = self.get_clock().now().to_msg()
         self.obstacle_pub.publish(obstacle_msg)
+
+    def _transform_point(self, point: Tuple[float, float, float]) -> Tuple[float, float, float]:
+        x, y, z = point
+        rot = self.lidar_rotation
+        tx, ty, tz = self.lidar_translation
+        x_new = rot[0, 0] * x + rot[0, 1] * y + rot[0, 2] * z + tx
+        y_new = rot[1, 0] * x + rot[1, 1] * y + rot[1, 2] * z + ty
+        z_new = rot[2, 0] * x + rot[2, 1] * y + rot[2, 2] * z + tz
+        return x_new, y_new, z_new
 
     # ------------------------------------------------------------------ Timer
     def _on_timer(self) -> None:
