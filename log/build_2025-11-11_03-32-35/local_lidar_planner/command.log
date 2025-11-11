@@ -1,2 +1,0 @@
-Invoking command in '/root/local_lidar_planner/build/local_lidar_planner': /usr/bin/cmake /root/local_lidar_planner/src/local_lidar_planner -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/root/local_lidar_planner/install/local_lidar_planner
-Invoked command in '/root/local_lidar_planner/build/local_lidar_planner' returned '1': /usr/bin/cmake /root/local_lidar_planner/src/local_lidar_planner -DCATKIN_INSTALL_INTO_PREFIX_ROOT=0 -DCMAKE_INSTALL_PREFIX=/root/local_lidar_planner/install/local_lidar_planner
