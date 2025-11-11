@@ -15,6 +15,7 @@
   <exec_depend>sensor_msgs</exec_depend>
   <exec_depend>sensor_msgs_py</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf_transformations</exec_depend>
   <exec_depend>unitree_api</exec_depend>
 
   <export>
