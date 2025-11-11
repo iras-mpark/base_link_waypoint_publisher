@@ -54,12 +54,8 @@ class UTLidarTransformer(Node):
         )
 
         self.get_logger().info(
-            "UTLiDAR transformer publishing %s -> %s with RPY=(%.3f, %.3f, %.3f)",
-            self.input_topic,
-            self.output_topic,
-            roll,
-            pitch,
-            yaw,
+            f"UTLiDAR transformer publishing {self.input_topic} -> {self.output_topic} "
+            f"with RPY=({roll:.3f}, {pitch:.3f}, {yaw:.3f})"
         )
 
     # ------------------------------------------------------------------ Callbacks
