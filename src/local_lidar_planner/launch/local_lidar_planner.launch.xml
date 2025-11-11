@@ -16,14 +16,14 @@
   <arg name="scan_topic" default="/utlidar/cloud"/>
   <arg name="transformed_scan_topic" default="/utlidar/transformed_cloud"/>
   <arg name="goal_tf_frame" default="suitcase_frame"/>
-  <arg name="obstacle_z_min" default="-1.0"/>
+  <arg name="obstacle_z_min" default="-0.0"/>
   <arg name="obstacle_z_max" default="1.0"/>
   <arg name="lidar_frame" default="utlidar_lidar"/>
   <arg name="lidar_x" default="0.0"/>
   <arg name="lidar_y" default="0.0"/>
   <arg name="lidar_z" default="0.0"/>
   <arg name="lidar_roll" default="0.0"/>
-  <arg name="lidar_pitch" default="-2.8782025850555556"/>
+  <arg name="lidar_pitch" default="2.8782025850555556"/>
   <arg name="lidar_yaw" default="0.0"/>
 
   <node pkg="local_lidar_planner" exec="utlidar_transformer.py" name="utlidar_transformer" output="screen">
