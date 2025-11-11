@@ -2,26 +2,20 @@
 <package format="3">
   <name>local_lidar_planner</name>
   <version>0.0.1</version>
-  <description>Purely local LiDAR-based obstacle avoidance planner that reuses the existing path library without relying on global mapping.</description>
+  <description>Purely local LiDAR-based obstacle avoidance planner implemented in Python for standalone deployments.</description>
 
   <maintainer email="maintainer@example.com">Autonomy Stack</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>rclcpp</depend>
-  <depend>std_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
   <depend>sensor_msgs_py</depend>
-  <depend>nav_msgs</depend>
-  <depend>geometry_msgs</depend>
-  <depend>rclpy</depend>
-  <depend>tf2</depend>
   <depend>tf2_ros</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>pcl_conversions</depend>
   <depend>unitree_api</depend>
-  <depend>go2_sport_api</depend>
 
   <export>
   </export>
