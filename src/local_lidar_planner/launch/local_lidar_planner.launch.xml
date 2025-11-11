@@ -14,6 +14,7 @@
   <arg name="goal_tf_timeout" default="0.5"/>
   <arg name="is_real_robot" default="true"/>
   <arg name="scan_topic" default="/utlidar/cloud"/>
+  <arg name="transformed_scan_topic" default="/utlidar/transformed_cloud"/>
   <arg name="goal_tf_frame" default="suitcase_frame"/>
   <arg name="lidar_frame" default="utlidar_lidar"/>
   <arg name="lidar_x" default="0.0"/>
@@ -23,12 +24,24 @@
   <arg name="lidar_pitch" default="-2.8782025850555556"/>
   <arg name="lidar_yaw" default="0.0"/>
 
+  <node pkg="local_lidar_planner" exec="utlidar_transformer.py" name="utlidar_transformer" output="screen">
+    <param name="input_topic" value="$(var scan_topic)"/>
+    <param name="output_topic" value="$(var transformed_scan_topic)"/>
+    <param name="target_frame" value="$(var path_frame)"/>
+    <param name="lidar_x" value="$(var lidar_x)"/>
+    <param name="lidar_y" value="$(var lidar_y)"/>
+    <param name="lidar_z" value="$(var lidar_z)"/>
+    <param name="lidar_roll" value="$(var lidar_roll)"/>
+    <param name="lidar_pitch" value="$(var lidar_pitch)"/>
+    <param name="lidar_yaw" value="$(var lidar_yaw)"/>
+  </node>
+
   <node pkg="local_lidar_planner" exec="local_lidar_planner_simple.py" name="local_lidar_planner_simple" output="screen">
     <param name="path_frame" value="$(var path_frame)"/>
     <param name="max_path_length" value="$(var max_path_length)"/>
     <param name="publish_rate_hz" value="$(var publish_rate_hz)"/>
     <param name="safety_radius" value="$(var safety_radius)"/>
-    <param name="scan_topic" value="$(var scan_topic)"/>
+    <param name="scan_topic" value="$(var transformed_scan_topic)"/>
     <param name="goal_tf_frame" value="$(var goal_tf_frame)"/>
     <param name="goal_offset" value="$(var goal_offset)"/>
     <param name="goal_tf_timeout" value="$(var goal_tf_timeout)"/>
