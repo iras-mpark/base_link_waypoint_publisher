@@ -16,6 +16,7 @@ def generate_launch_description() -> LaunchDescription:
     waypoint_topic = LaunchConfiguration("waypoint_topic")
     publish_period = LaunchConfiguration("publish_period")
     stop_distance = LaunchConfiguration("stop_distance")
+    use_sim_time = LaunchConfiguration("use_sim_time")
 
     node = Node(
         package="base_link_waypoint_publisher",
@@ -30,6 +31,7 @@ def generate_launch_description() -> LaunchDescription:
             "waypoint_topic": waypoint_topic,
             "publish_period": publish_period,
             "stop_distance": stop_distance,
+            "use_sim_time": use_sim_time,
         }],
     )
 
@@ -41,5 +43,6 @@ def generate_launch_description() -> LaunchDescription:
         declare_arg("waypoint_topic", "/way_point", "Topic for waypoint publishing."),
         declare_arg("publish_period", "0.2", "Timer period (seconds) between publishes."),
         declare_arg("stop_distance", "1.0", "Desired stand-off distance (meters)."),
+        declare_arg("use_sim_time", "true", "Toggle ROS time usage."),
         node,
     ])

@@ -5,6 +5,8 @@
 
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <rclcpp/exceptions/exceptions.hpp>
+#include <rclcpp/parameter.hpp>
 #include <rclcpp/rclcpp.hpp>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -38,6 +40,8 @@ public:
 
     waypoint_pub_ =
       this->create_publisher<geometry_msgs::msg::PointStamped>(waypoint_topic_, rclcpp::QoS(5));
+
+    declare_sim_time();
 
     publish_static_identity();
 
@@ -151,6 +155,16 @@ private:
   double publish_period_;
   double stop_distance_;
   double target_timeout_;
+
+  void declare_sim_time()
+  {
+    try {
+      this->declare_parameter<bool>("use_sim_time", true);
+    } catch (const rclcpp::exceptions::ParameterAlreadyDeclaredException &) {
+      // Parameter already declared elsewhere.
+    }
+    this->set_parameter(rclcpp::Parameter("use_sim_time", true));
+  }
 };
 
 int main(int argc, char ** argv)
