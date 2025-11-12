@@ -1,21 +1,18 @@
 #!/usr/bin/env python3
 """Lightweight LiDAR-only local planner.
 
-This node keeps the original C++ planner available but offers a drastically
-simplified fallback that:
-  * drives straight toward the waypoint whenever possible,
-  * rejects headings that contain LiDAR returns inside a configurable safety
-    radius, and
-  * publishes a short local path in the vehicle frame.
-
-It intentionally ignores joystick commands, external obstacle injections, and
-other side channels so it can run standalone in minimal deployments.
+The node voxelizes the latest scan into a local occupancy grid, inflates
+obstacles by the configured safety radius, and runs an A* search toward the
+goal expressed in `path_frame`. The resulting path is published as a short plan
+plus visualizers (`/goal_preview`, `/goal_raw`, `/local_obstacles`) so it can
+run standalone in minimal deployments.
 """
 
 from __future__ import annotations
 
 import math
-from typing import List, Optional, Sequence, Tuple
+import heapq
+from typing import Dict, List, Optional, Sequence, Tuple, Set
 
 import rclpy
 from rclpy.duration import Duration
@@ -43,10 +40,9 @@ class SimpleLocalPlanner(Node):
         self.declare_parameter("goal_offset", 1.0)
 
         # Obstacle handling parameters
-        self.declare_parameter("num_heading_bins", 72)
         self.declare_parameter("safety_radius", 0.45)
-        self.declare_parameter("heading_clearance_deg", 8.0)
         self.declare_parameter("max_considered_range", 4.0)
+        self.declare_parameter("grid_resolution", 0.2)
         self.declare_parameter("obstacle_z_min", -1.0)
         self.declare_parameter("obstacle_z_max", 1.0)
         self.declare_parameter("scan_topic", "/utlidar/cloud")
@@ -60,15 +56,13 @@ class SimpleLocalPlanner(Node):
         self.max_path_length = self.get_parameter("max_path_length").get_parameter_value().double_value
         self.goal_tolerance = self.get_parameter("goal_tolerance").get_parameter_value().double_value
         self.goal_offset = self.get_parameter("goal_offset").get_parameter_value().double_value
-        self.num_heading_bins = int(self.get_parameter("num_heading_bins").get_parameter_value().integer_value)
         self.safety_radius = self.get_parameter("safety_radius").get_parameter_value().double_value
-
-        heading_clearance = math.radians(
-            self.get_parameter("heading_clearance_deg").get_parameter_value().double_value
-        )
-        self.heading_clearance_bins = max(1, int(round(heading_clearance / (2.0 * math.pi / self.num_heading_bins))))
-
         self.max_considered_range = self.get_parameter("max_considered_range").get_parameter_value().double_value
+        self.grid_resolution = max(
+            0.05, self.get_parameter("grid_resolution").get_parameter_value().double_value
+        )
+        self.grid_radius_cells = max(1, int(math.ceil(self.max_considered_range / self.grid_resolution)))
+        self.inflation_cells = max(0, int(math.ceil(self.safety_radius / self.grid_resolution)))
         self.obstacle_z_min = self.get_parameter("obstacle_z_min").get_parameter_value().double_value
         self.obstacle_z_max = self.get_parameter("obstacle_z_max").get_parameter_value().double_value
         self.scan_topic = self.get_parameter("scan_topic").get_parameter_value().string_value
@@ -77,8 +71,7 @@ class SimpleLocalPlanner(Node):
             raise ValueError("goal_tf_frame parameter must be set (e.g., 'suitcase_frame').")
         self.goal_tf_timeout = self.get_parameter("goal_tf_timeout").get_parameter_value().double_value
 
-        self.bin_ranges: List[float] = [math.inf for _ in range(self.num_heading_bins)]
-        self.last_scan_time = self.get_clock().now()
+        self.latest_obstacles: List[Tuple[float, float]] = []
 
         # TF tracking
         self.tf_buffer = Buffer()
@@ -98,10 +91,9 @@ class SimpleLocalPlanner(Node):
 
     # ------------------------------------------------------------------ Callbacks
     def _scan_callback(self, cloud: PointCloud2) -> None:
-        """Convert the incoming point cloud into a coarse polar histogram."""
-        self.bin_ranges = [math.inf for _ in range(self.num_heading_bins)]
-        had_points = False
+        """Convert the incoming point cloud into a filtered obstacle list."""
         obstacle_points: List[Tuple[float, float, float]] = []
+        xy_points: List[Tuple[float, float]] = []
 
         for point in point_cloud2.read_points(cloud, field_names=("x", "y", "z"), skip_nans=True):
             x, y, z = point
@@ -117,9 +109,8 @@ class SimpleLocalPlanner(Node):
                 self.bin_ranges[idx] = distance
             had_points = True
             obstacle_points.append((x, y, z))
+            xy_points.append((x, y))
 
-        if had_points:
-            self.last_scan_time = self.get_clock().now()
         obstacle_header = cloud.header
         obstacle_header.frame_id = self.path_frame
         if obstacle_points:
@@ -129,6 +120,7 @@ class SimpleLocalPlanner(Node):
             obstacle_msg.header = obstacle_header
         obstacle_msg.header.stamp = self.get_clock().now().to_msg()
         self.obstacle_pub.publish(obstacle_msg)
+        self.latest_obstacles = xy_points
 
     # ------------------------------------------------------------------ Timer
     def _on_timer(self) -> None:
@@ -145,39 +137,52 @@ class SimpleLocalPlanner(Node):
 
         rel_goal = self._lookup_goal_in_vehicle(now)
         if rel_goal is None:
-            self._publish_goal_marker(0.0, 0.0, now)
             path.poses.append(self._pose_at(0.0, 0.0, 0.0, now))
+            self._publish_goal_marker(0.0, 0.0, now)
             return path
 
         raw_distance = math.hypot(rel_goal[0], rel_goal[1])
         desired_heading = math.atan2(rel_goal[1], rel_goal[0])
-        self._publish_goal_marker(rel_goal[0], rel_goal[1], now)
 
         if raw_distance <= self.goal_offset:
             path.poses.append(self._pose_at(0.0, 0.0, desired_heading, now))
+            self._publish_goal_marker(0.0, 0.0, now)
             return path
 
         goal_distance = max(0.0, raw_distance - self.goal_offset)
 
         if goal_distance < self.goal_tolerance:
             path.poses.append(self._pose_at(0.0, 0.0, desired_heading, now))
+            self._publish_goal_marker(0.0, 0.0, now)
             return path
-        heading = self._select_heading(desired_heading)
+        max_travel = self.max_path_length
+        if self.max_considered_range > 0:
+            max_travel = min(self.max_path_length, self.max_considered_range)
+        if max_travel <= 0:
+            max_travel = goal_distance
+        if goal_distance > max_travel and goal_distance > 1e-6:
+            scale = max_travel / goal_distance
+            goal_distance = max_travel
+            rel_goal = (rel_goal[0] * scale, rel_goal[1] * scale)
+            desired_heading = math.atan2(rel_goal[1], rel_goal[0])
 
-        if heading is None:
-            # No clear heading: stop in place
+        path_points = self._plan_path_astar(rel_goal[0], rel_goal[1])
+        if not path_points:
             path.poses.append(self._pose_at(0.0, 0.0, desired_heading, now))
+            self._publish_goal_marker(0.0, 0.0, now)
             return path
 
-        path_length = min(goal_distance, self.max_path_length)
-        num_segments = max(1, int(math.ceil(path_length / self.path_resolution)))
+        prev = path_points[0]
+        for current in path_points[1:]:
+            heading = math.atan2(current[1] - prev[1], current[0] - prev[0])
+            path.poses.append(self._pose_at(current[0], current[1], heading, now))
+            prev = current
 
-        for i in range(1, num_segments + 1):
-            distance = min(i * self.path_resolution, path_length)
-            x = math.cos(heading) * distance
-            y = math.sin(heading) * distance
-            path.poses.append(self._pose_at(x, y, heading, now))
-
+        if path.poses:
+            last_pose = path.poses[-1].pose.position
+            self._publish_goal_marker(last_pose.x, last_pose.y, now)
+        else:
+            self._publish_goal_marker(0.0, 0.0, now)
         return path
 
     def _lookup_goal_in_vehicle(self, stamp: Time) -> Optional[Tuple[float, float]]:
@@ -204,39 +209,121 @@ class SimpleLocalPlanner(Node):
                 self._last_tf_warn_time = now_sec
             return None
 
-    def _select_heading(self, desired: float) -> Optional[float]:
-        if self._is_heading_clear(desired):
-            return desired
+    def _build_occupancy(self) -> Set[Tuple[int, int]]:
+        occupancy: Set[Tuple[int, int]] = set()
+        if not self.latest_obstacles:
+            return occupancy
 
-        bin_step = 1
-        while bin_step <= self.num_heading_bins // 2:
-            offset = bin_step * (2.0 * math.pi / self.num_heading_bins)
-            for direction in (1, -1):
-                candidate = self._normalize_angle(desired + direction * offset)
-                if self._is_heading_clear(candidate):
-                    return candidate
-            bin_step += 1
+        max_cells = self.grid_radius_cells
+        for x, y in self.latest_obstacles:
+            if math.hypot(x, y) > self.max_considered_range:
+                continue
+            cell = self._world_to_cell(x, y)
+            for dx in range(-self.inflation_cells, self.inflation_cells + 1):
+                for dy in range(-self.inflation_cells, self.inflation_cells + 1):
+                    if dx * dx + dy * dy > self.inflation_cells * self.inflation_cells:
+                        continue
+                    occ = (cell[0] + dx, cell[1] + dy)
+                    if abs(occ[0]) <= max_cells and abs(occ[1]) <= max_cells:
+                        occupancy.add(occ)
+        return occupancy
+
+    def _plan_path_astar(self, goal_x: float, goal_y: float) -> Optional[List[Tuple[float, float]]]:
+        occupancy = self._build_occupancy()
+        grid_limit = self.grid_radius_cells * self.grid_resolution
+        goal_distance = math.hypot(goal_x, goal_y)
+        if goal_distance > grid_limit and goal_distance > 1e-6:
+            scale = grid_limit / goal_distance
+            goal_x *= scale
+            goal_y *= scale
+        start_cell = (0, 0)
+        goal_cell = self._world_to_cell(goal_x, goal_y)
+
+        if goal_cell == start_cell:
+            return [(0.0, 0.0)]
+
+        if goal_cell in occupancy:
+            goal_cell = self._find_nearest_free(goal_cell, occupancy)
+            if goal_cell is None:
+                return None
+
+        def heuristic(cell: Tuple[int, int]) -> float:
+            return math.hypot(goal_cell[0] - cell[0], goal_cell[1] - cell[1])
+
+        open_heap: List[Tuple[float, float, Tuple[int, int]]] = []
+        heapq.heappush(open_heap, (heuristic(start_cell), 0.0, start_cell))
+        came_from: Dict[Tuple[int, int], Tuple[int, int]] = {}
+        g_cost: Dict[Tuple[int, int], float] = {start_cell: 0.0}
+        max_cells = self.grid_radius_cells
+        directions = [
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (1, -1),
+            (-1, 1),
+            (-1, -1),
+        ]
+
+        while open_heap:
+            _, current_cost, current = heapq.heappop(open_heap)
+            if current == goal_cell:
+                return self._reconstruct_path(came_from, current)
+
+            for dx, dy in directions:
+                neighbor = (current[0] + dx, current[1] + dy)
+                if abs(neighbor[0]) > max_cells or abs(neighbor[1]) > max_cells:
+                    continue
+                if neighbor != start_cell and neighbor in occupancy:
+                    continue
+                step = math.hypot(dx, dy)
+                tentative_cost = current_cost + step
+                if tentative_cost < g_cost.get(neighbor, math.inf):
+                    came_from[neighbor] = current
+                    g_cost[neighbor] = tentative_cost
+                    priority = tentative_cost + heuristic(neighbor)
+                    heapq.heappush(open_heap, (priority, tentative_cost, neighbor))
+
         return None
 
-    def _is_heading_clear(self, heading: float) -> bool:
-        idx = self._heading_to_index(heading)
-        bins_to_check = range(
-            max(0, idx - self.heading_clearance_bins), min(self.num_heading_bins, idx + self.heading_clearance_bins + 1)
+    def _reconstruct_path(
+        self, came_from: Dict[Tuple[int, int], Tuple[int, int]], current: Tuple[int, int]
+    ) -> List[Tuple[float, float]]:
+        cells = [current]
+        while current in came_from:
+            current = came_from[current]
+            cells.append(current)
+        cells.reverse()
+        return [self._cell_to_world(cell) for cell in cells]
+
+    def _find_nearest_free(
+        self, start_cell: Tuple[int, int], occupancy: Set[Tuple[int, int]]
+    ) -> Optional[Tuple[int, int]]:
+        if start_cell not in occupancy:
+            return start_cell
+        max_cells = self.grid_radius_cells
+        max_radius = max_cells
+        for radius in range(1, max_radius + 1):
+            for dx in range(-radius, radius + 1):
+                for dy in range(-radius, radius + 1):
+                    if abs(dx) != radius and abs(dy) != radius:
+                        continue
+                    candidate = (start_cell[0] + dx, start_cell[1] + dy)
+                    if abs(candidate[0]) > max_cells or abs(candidate[1]) > max_cells:
+                        continue
+                    if candidate not in occupancy:
+                        return candidate
+        return None
+
+    def _world_to_cell(self, x: float, y: float) -> Tuple[int, int]:
+        return (
+            int(round(x / self.grid_resolution)),
+            int(round(y / self.grid_resolution)),
         )
-        recent_scan = (self.get_clock().now() - self.last_scan_time) < Duration(seconds=1.0)
-        if not recent_scan:
-            return True
 
-        for i in bins_to_check:
-            if self.bin_ranges[i] < self.safety_radius:
-                return False
-        return True
-
-    def _heading_to_index(self, heading: float) -> int:
-        normalized = self._normalize_angle(heading)
-        fraction = (normalized + math.pi) / (2.0 * math.pi)
-        idx = int(fraction * self.num_heading_bins) % self.num_heading_bins
-        return idx
+    def _cell_to_world(self, cell: Tuple[int, int]) -> Tuple[float, float]:
+        return (cell[0] * self.grid_resolution, cell[1] * self.grid_resolution)
 
     def _pose_at(self, x: float, y: float, heading: float, stamp) -> PoseStamped:
         pose = PoseStamped()
@@ -255,11 +342,6 @@ class SimpleLocalPlanner(Node):
         goal.point.x = x
         goal.point.y = y
         self.goal_pub.publish(goal)
-
-    @staticmethod
-    def _normalize_angle(angle: float) -> float:
-        return math.atan2(math.sin(angle), math.cos(angle))
-
 
 def main(args: Optional[Sequence[str]] = None) -> None:
     rclpy.init(args=args)
