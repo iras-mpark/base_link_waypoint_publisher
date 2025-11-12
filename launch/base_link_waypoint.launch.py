@@ -14,6 +14,7 @@ def generate_launch_description() -> LaunchDescription:
     target_frame = LaunchConfiguration("target_frame")
     global_frame = LaunchConfiguration("global_frame")
     waypoint_topic = LaunchConfiguration("waypoint_topic")
+    joy_topic = LaunchConfiguration("joy_topic")
     publish_period = LaunchConfiguration("publish_period")
     stop_distance = LaunchConfiguration("stop_distance")
     target_timeout = LaunchConfiguration("target_timeout")
@@ -30,6 +31,7 @@ def generate_launch_description() -> LaunchDescription:
             "target_frame": target_frame,
             "global_frame": global_frame,
             "waypoint_topic": waypoint_topic,
+            "joy_topic": joy_topic,
             "publish_period": publish_period,
             "stop_distance": stop_distance,
             "target_timeout": target_timeout,
@@ -43,6 +45,7 @@ def generate_launch_description() -> LaunchDescription:
         declare_arg("target_frame", "suitcase_frame", "Frame the vehicle approaches."),
         declare_arg("global_frame", "map", "Frame in which the waypoint is published."),
         declare_arg("waypoint_topic", "/way_point", "Topic for waypoint publishing."),
+        declare_arg("joy_topic", "/joy", "Topic for the fake joystick trigger."),
         declare_arg("publish_period", "0.2", "Timer period (seconds) between publishes."),
         declare_arg("stop_distance", "1.0", "Desired stand-off distance (meters)."),
         declare_arg(

@@ -8,6 +8,7 @@
 #include <rclcpp/exceptions/exceptions.hpp>
 #include <rclcpp/parameter.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 #if __has_include(<tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 #elif __has_include(<tf2_geometry_msgs/tf2_geometry_msgs/tf2_geometry_msgs.hpp>)
@@ -27,19 +28,22 @@ public:
     tf_buffer_(this->get_clock()),
     tf_listener_(tf_buffer_),
     static_broadcaster_(std::make_shared<tf2_ros::StaticTransformBroadcaster>(this)),
-    arrived_(false)
+    arrived_(false),
+    joy_sent_(false)
   {
     parent_frame_ = this->declare_parameter<std::string>("parent_frame", "vehicle");
     base_frame_ = this->declare_parameter<std::string>("base_link_frame", "base_link");
     target_frame_ = this->declare_parameter<std::string>("target_frame", "suitcase_frame");
     global_frame_ = this->declare_parameter<std::string>("global_frame", "map");
     waypoint_topic_ = this->declare_parameter<std::string>("waypoint_topic", "/way_point");
+    joy_topic_ = this->declare_parameter<std::string>("joy_topic", "/joy");
     publish_period_ = this->declare_parameter<double>("publish_period", 0.2);
     stop_distance_ = this->declare_parameter<double>("stop_distance", 1.0);
     target_timeout_ = this->declare_parameter<double>("target_timeout", 0.5);
 
     waypoint_pub_ =
       this->create_publisher<geometry_msgs::msg::PointStamped>(waypoint_topic_, rclcpp::QoS(5));
+    joy_pub_ = this->create_publisher<sensor_msgs::msg::Joy>(joy_topic_, rclcpp::QoS(5));
 
     declare_sim_time();
 
@@ -133,6 +137,7 @@ private:
     }
 
     waypoint_pub_->publish(waypoint_in_global);
+    handle_fake_joy(now);
 
     if (arrived_) {
       RCLCPP_INFO_THROTTLE(
@@ -146,16 +151,43 @@ private:
   tf2_ros::TransformListener tf_listener_;
   std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_broadcaster_;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr waypoint_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr joy_pub_;
   rclcpp::TimerBase::SharedPtr timer_;
   bool arrived_;
+  bool joy_sent_;
   std::string parent_frame_;
   std::string base_frame_;
   std::string target_frame_;
   std::string global_frame_;
   std::string waypoint_topic_;
+  std::string joy_topic_;
   double publish_period_;
   double stop_distance_;
   double target_timeout_;
+
+  void handle_fake_joy(const rclcpp::Time & stamp)
+  {
+    const bool need_motion_goal = !arrived_;
+    if (need_motion_goal && !joy_sent_) {
+      publish_fake_joy(stamp);
+      joy_sent_ = true;
+    } else if (!need_motion_goal) {
+      joy_sent_ = false;
+    }
+  }
+
+  void publish_fake_joy(const rclcpp::Time & stamp)
+  {
+    if (!joy_pub_) {
+      return;
+    }
+    sensor_msgs::msg::Joy joy;
+    joy.header.stamp = stamp;
+    joy.header.frame_id = "waypoint_tool";
+    joy.axes = {0.0, 0.0, -1.0, 0.0, 1.0, 1.0, 0.0, 0.0};
+    joy.buttons = {0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
+    joy_pub_->publish(joy);
+  }
 
   void declare_sim_time()
   {
