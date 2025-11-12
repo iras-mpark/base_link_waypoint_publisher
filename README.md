@@ -1,23 +1,41 @@
-# Local LiDAR Planner Workspace
+## base_link_waypoint_publisher
 
-This workspace contains a stripped-down ROS 2 package `local_lidar_planner` that performs purely local, LiDAR-based obstacle avoidance. The package was extracted from the main autonomy stack so it can be versioned separately and iterated on without coupling to global-mapping logic. All legacy C++ nodes have been removed so the workspace only ships the lightweight Python pipeline.
+A minimal ROS 2 package that computes a hold waypoint in `map` (or any global frame) so the base link stops a configurable distance before a target TF frame. It also ships the `system_local_lidar_planner.sh` helper that launches the node after sourcing the workspace.
 
-## Layout
-
-- `src/local_lidar_planner`: ROS 2 package with launch files and the Python planner/follower pair.
-
-You can build it with:
+### Build
 
 ```bash
-cd /root/local_lidar_planner_ws
-colcon build --packages-select local_lidar_planner
+cd /path/to/your_ws
+colcon build
 source install/setup.bash
-ros2 launch local_lidar_planner local_lidar_planner.launch
 ```
 
-That launch file brings up the **simple** Python planner/follower pair:
+No extra `colcon` options are required.
 
-- `local_lidar_planner_simple.py`: takes `/utlidar/cloud` plus a TF transform from `path_frame` (default `base_link`) to `goal_tf_frame` (e.g., `suitcase_frame`), then builds a path that keeps the robot facing the target but stops `goal_offset` meters short (default 1 m) while rejecting blocked headings. It also publishes `/goal_preview` in `base_link` for quick RViz visualization.
-- `path_follower_simple.py`: consumes the simple path, scales speed with goal distance (up to `max_speed`), and publishes `/cmd_vel` without touching `/joy`, `/speed`, or `/stop`. When `is_real_robot=true`, it mirrors the command into `/api/sport/request` using the same MOVE/STOP payloads as the C++ follower.
+### Parameters
 
-> **LiDAR input:** The simple planner defaults to reading `/utlidar/cloud` and assumes the scan is expressed in `base_link`. If your LiDAR publishes in another frame (e.g., `utlidar_lidar`), set the `lidar_*` launch arguments to inject the correct static transform into TF.
+All parameters are declared on the node and may be overridden via the launch file:
+
+| Name | Default | Description |
+| --- | --- | --- |
+| `parent_frame` | `vehicle` | Frame used as the parent for the static identity transform. |
+| `base_link_frame` | `base_link` | Base link to move toward the target. |
+| `target_frame` | `suitcase_frame` | Frame representing the object the robot approaches. |
+| `global_frame` | `map` | Frame where waypoints are published. |
+| `waypoint_topic` | `/way_point` | Output topic for `geometry_msgs/PointStamped`. |
+| `publish_period` | `0.2` | Timer period in seconds. |
+| `stop_distance` | `1.0` | Minimum distance (m) to keep from the target. |
+
+### Launching
+
+Use either the ROS 2 launch file or the helper script:
+
+```bash
+# Launch directly
+ros2 launch base_link_waypoint_publisher base_link_waypoint.launch.py
+
+# Or run the wrapper script (also sources install/setup.bash)
+./install/base_link_waypoint_publisher/lib/system_local_lidar_planner.sh
+```
+
+`system_local_lidar_planner.sh` tries to start `~/autonomy_stack_go2/system_real_robot.sh` if it exists and then launches `ros2 launch base_link_waypoint_publisher base_link_waypoint.launch.py`.
