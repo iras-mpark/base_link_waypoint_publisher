@@ -89,6 +89,7 @@ class SimpleLocalPlanner(Node):
         self.create_subscription(PointCloud2, self.scan_topic, self._scan_callback, 5)
         self.path_pub = self.create_publisher(Path, "/path", 10)
         self.goal_pub = self.create_publisher(PointStamped, "/goal_preview", 5)
+        self.goal_raw_pub = self.create_publisher(PointStamped, "/goal_raw", 5)
         obstacle_topic = self.get_parameter("obstacle_topic").get_parameter_value().string_value
         self.obstacle_pub = self.create_publisher(PointCloud2, obstacle_topic, 5)
 
@@ -142,7 +143,7 @@ class SimpleLocalPlanner(Node):
         path.header.stamp = now.to_msg()
         path.header.frame_id = self.path_frame
 
-        rel_goal = self._lookup_goal_in_vehicle()
+        rel_goal = self._lookup_goal_in_vehicle(now)
         if rel_goal is None:
             self._publish_goal_marker(0.0, 0.0, now)
             path.poses.append(self._pose_at(0.0, 0.0, 0.0, now))
@@ -179,7 +180,7 @@ class SimpleLocalPlanner(Node):
 
         return path
 
-    def _lookup_goal_in_vehicle(self) -> Optional[Tuple[float, float]]:
+    def _lookup_goal_in_vehicle(self, stamp: Time) -> Optional[Tuple[float, float]]:
         try:
             transform = self.tf_buffer.lookup_transform(
                 self.path_frame,
@@ -189,6 +190,12 @@ class SimpleLocalPlanner(Node):
             )
             rel_x = transform.transform.translation.x
             rel_y = transform.transform.translation.y
+            raw_msg = PointStamped()
+            raw_msg.header.stamp = stamp.to_msg()
+            raw_msg.header.frame_id = self.path_frame
+            raw_msg.point.x = rel_x
+            raw_msg.point.y = rel_y
+            self.goal_raw_pub.publish(raw_msg)
             return rel_x, rel_y
         except TransformException as exc:
             now_sec = self.get_clock().now().nanoseconds / 1e9
