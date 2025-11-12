@@ -34,6 +34,7 @@ public:
     waypoint_topic_ = this->declare_parameter<std::string>("waypoint_topic", "/way_point");
     publish_period_ = this->declare_parameter<double>("publish_period", 0.2);
     stop_distance_ = this->declare_parameter<double>("stop_distance", 1.0);
+    target_timeout_ = this->declare_parameter<double>("target_timeout", 0.5);
 
     waypoint_pub_ =
       this->create_publisher<geometry_msgs::msg::PointStamped>(waypoint_topic_, rclcpp::QoS(5));
@@ -62,11 +63,11 @@ private:
     static_broadcaster_->sendTransform(tf);
   }
 
-  geometry_msgs::msg::PointStamped make_hold_waypoint()
+  geometry_msgs::msg::PointStamped make_hold_waypoint(const rclcpp::Time & stamp)
   {
     geometry_msgs::msg::PointStamped hold;
     hold.header.frame_id = base_frame_;
-    hold.header.stamp = this->get_clock()->now();
+    hold.header.stamp = stamp;
     hold.point.x = 0.0;
     hold.point.y = 0.0;
     hold.point.z = 0.0;
@@ -75,7 +76,8 @@ private:
 
   void timer_cb()
   {
-    geometry_msgs::msg::PointStamped waypoint_in_base = make_hold_waypoint();
+    const auto now = this->get_clock()->now();
+    geometry_msgs::msg::PointStamped waypoint_in_base = make_hold_waypoint(now);
     geometry_msgs::msg::PointStamped waypoint_in_global;
 
     try {
@@ -85,7 +87,14 @@ private:
       const double dy = base_to_target.transform.translation.y;
       const double dist_xy = std::hypot(dx, dy);
 
-      if (dist_xy <= stop_distance_) {
+      const double age = (now - rclcpp::Time(base_to_target.header.stamp)).seconds();
+      if (target_timeout_ > 0.0 && age > target_timeout_) {
+        arrived_ = false;
+        RCLCPP_WARN_THROTTLE(
+          get_logger(), *get_clock(), 5000,
+          "Transform %s -> %s is stale (%.2fs > %.2fs). Publishing hold waypoint on %s.",
+          base_frame_.c_str(), target_frame_.c_str(), age, target_timeout_, waypoint_topic_.c_str());
+      } else if (dist_xy <= stop_distance_) {
         arrived_ = true;
         waypoint_in_base.point.x = 0.0;
         waypoint_in_base.point.y = 0.0;
@@ -139,6 +148,7 @@ private:
   std::string waypoint_topic_;
   double publish_period_;
   double stop_distance_;
+  double target_timeout_;
 };
 
 int main(int argc, char ** argv)
