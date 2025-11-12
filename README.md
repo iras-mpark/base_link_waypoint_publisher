@@ -25,7 +25,7 @@ All parameters are declared on the node and may be overridden via the launch fil
 | `waypoint_topic` | `/way_point` | Output topic for `geometry_msgs/PointStamped`. |
 | `publish_period` | `0.2` | Timer period in seconds. |
 | `stop_distance` | `1.0` | Minimum distance (m) to keep from the target. |
-| `target_timeout` | `0.5` | Warn if the `target_frame` TF is older than this many seconds (`-1` disables). |
+| `target_timeout` | `0.5` | Maximum time the `target_frame` TF can stay unchanged before the robot holds position (`-1` disables). |
 | `use_sim_time` | `false` | Toggle ROS time usage (set to `true` in simulation only). |
 
 ### Launching

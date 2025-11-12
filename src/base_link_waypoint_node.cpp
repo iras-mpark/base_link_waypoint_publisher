@@ -27,7 +27,8 @@ public:
     tf_buffer_(this->get_clock()),
     tf_listener_(tf_buffer_),
     static_broadcaster_(std::make_shared<tf2_ros::StaticTransformBroadcaster>(this)),
-    arrived_(false)
+    arrived_(false),
+    target_stamp_initialized_(false)
   {
     parent_frame_ = this->declare_parameter<std::string>("parent_frame", "vehicle");
     base_frame_ = this->declare_parameter<std::string>("base_link_frame", "base_link");
@@ -83,6 +84,7 @@ private:
     const auto now = this->get_clock()->now();
     geometry_msgs::msg::PointStamped waypoint_in_base = make_hold_waypoint(now);
     geometry_msgs::msg::PointStamped waypoint_in_global;
+    bool target_available = true;
 
     try {
       const auto base_to_target = tf_buffer_.lookupTransform(
@@ -93,16 +95,40 @@ private:
       const auto stamp = rclcpp::Time(base_to_target.header.stamp);
       const bool stamp_valid = stamp.nanoseconds() > 0;
       const double age = stamp_valid ? (now - stamp).seconds() : 0.0;
-      const bool target_stale = target_timeout_ > 0.0 && stamp_valid && age > target_timeout_;
+      bool stamp_progressed = true;
 
-      if (target_stale) {
+      if (stamp_valid) {
+        if (!target_stamp_initialized_ || stamp != last_target_stamp_) {
+          last_target_stamp_ = stamp;
+          target_stamp_initialized_ = true;
+        } else {
+          stamp_progressed = false;
+        }
+      } else {
+        target_stamp_initialized_ = false;
+      }
+
+      const bool target_stale = target_timeout_ > 0.0 && stamp_valid && age > target_timeout_;
+      if (target_stale && stamp_progressed) {
         RCLCPP_WARN_THROTTLE(
           get_logger(), *get_clock(), 5000,
           "Transform %s -> %s is stale (%.2fs > %.2fs) but using it for waypoint generation.",
           base_frame_.c_str(), target_frame_.c_str(), age, target_timeout_);
       }
 
-      if (dist_xy <= stop_distance_) {
+      const bool target_lost =
+        target_timeout_ > 0.0 && stamp_valid && !stamp_progressed && age > target_timeout_;
+      if (target_lost) {
+        target_available = false;
+        RCLCPP_WARN_THROTTLE(
+          get_logger(), *get_clock(), 5000,
+          "Transform %s -> %s stopped updating (%.2fs without change); holding waypoint.",
+          base_frame_.c_str(), target_frame_.c_str(), age);
+      }
+
+      if (!target_available) {
+        arrived_ = false;
+      } else if (dist_xy <= stop_distance_) {
         arrived_ = true;
         waypoint_in_base.point.x = 0.0;
         waypoint_in_base.point.y = 0.0;
@@ -117,6 +143,7 @@ private:
       }
     } catch (const tf2::TransformException & ex) {
       arrived_ = false;
+      target_available = false;
       RCLCPP_WARN_THROTTLE(
         get_logger(), *get_clock(), 5000,
         "Failed to lookup %s -> %s: %s. Publishing hold waypoint on %s.",
@@ -157,6 +184,8 @@ private:
   double publish_period_;
   double stop_distance_;
   double target_timeout_;
+  rclcpp::Time last_target_stamp_;
+  bool target_stamp_initialized_;
 
   void declare_sim_time()
   {
