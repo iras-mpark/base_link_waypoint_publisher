@@ -36,8 +36,9 @@ class SlidingWindowLidarAccumulator(Node):
         self.max_clouds = max(1, self.get_parameter("max_clouds").get_parameter_value().integer_value)
         publish_rate = max(1e-2, self.get_parameter("publish_rate_hz").get_parameter_value().double_value)
 
-        self._history: Deque[Tuple[Time, List[Tuple[float, float, float]]]] = deque()
+        self._history: Deque[Tuple[Time, List[Tuple[float, ...]]]] = deque()
         self._last_frame_id: Optional[str] = None
+        self._fields: Optional[List] = None
 
         self._subscription = self.create_subscription(
             PointCloud2, self.input_topic, self._cloud_callback, 10
@@ -54,15 +55,17 @@ class SlidingWindowLidarAccumulator(Node):
     # ------------------------------------------------------------------ Helpers
     def _cloud_callback(self, cloud: PointCloud2) -> None:
         """Cache the incoming cloud and immediately prune old entries."""
-        raw_points = list(
-            point_cloud2.read_points(cloud, field_names=("x", "y", "z"), skip_nans=True)
-        )
+        raw_points = list(point_cloud2.read_points(cloud, skip_nans=True))
         now = self.get_clock().now()
         if not raw_points:
             self._prune_history(now)
             return
 
         self._last_frame_id = cloud.header.frame_id or self._last_frame_id
+        if self._fields is None:
+            # Preserve the original point layout (x/y/z/intensity/...) so downstream nodes stay compatible.
+            self._fields = list(cloud.fields)
+
         cloud_stamp = Time.from_msg(cloud.header.stamp)
         self._history.append((cloud_stamp, raw_points))
         while len(self._history) > self.max_clouds:
@@ -81,7 +84,7 @@ class SlidingWindowLidarAccumulator(Node):
         now = self.get_clock().now()
         self._prune_history(now)
 
-        accumulated: List[Tuple[float, float, float]] = []
+        accumulated: List[Tuple[float, ...]] = []
         for _, points in self._history:
             accumulated.extend(points)
 
@@ -90,7 +93,10 @@ class SlidingWindowLidarAccumulator(Node):
         header.frame_id = self._last_frame_id or ""
 
         if accumulated:
-            msg = point_cloud2.create_cloud_xyz32(header, accumulated)
+            if self._fields:
+                msg = point_cloud2.create_cloud(header, self._fields, accumulated)
+            else:
+                msg = point_cloud2.create_cloud_xyz32(header, accumulated)
         else:
             msg = PointCloud2()
             msg.header = header
